@@ -11,11 +11,11 @@ public class Particle {
 
 public class Simulation {
     private Random random = new Random();
-    private const int WindowWidth = 1280;
-    private const int WindowHeight = 960;
-    private const int LogicalWidth = 200;
-    private const int LogicalHeight = 150;
-    private const int ParticleCount = 100;
+    private const int WindowWidth = 1000;
+    private const int WindowHeight = 600;
+    private const int LogicalWidth = 50;
+    private const int LogicalHeight = 30;
+    private const int ParticleCount = 200;
 
     private RenderWindow window;
     private HashSet<Vector2i> occupiedPositions;
@@ -101,8 +101,7 @@ public class Simulation {
         }
     }
 
-    public static void Main()
-    {
+    public static void Main() {
         var simulation = new Simulation();
         simulation.Run();
     }
