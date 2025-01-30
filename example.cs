@@ -1,15 +1,6 @@
-﻿// TODO
-// random position on edge of window rather than anywhere maybe
-// colour to represent particle time to aggregate
-// properly parameterise scale
-// show diffusion path
-
-using SFML.Graphics;
+﻿using SFML.Graphics;
 using SFML.System;
 using SFML.Window;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 public class Particle {
     public Vector2i Position;
@@ -19,14 +10,14 @@ public class Particle {
 }
 
 public class Simulation {
-    private const int WindowWidth = 800;
-    private const int WindowHeight = 800;
+    private Random random = new Random();
+    private const int WindowWidth = 1280;
+    private const int WindowHeight = 960;
     private const int LogicalWidth = 200;
-    private const int LogicalHeight = 200;
+    private const int LogicalHeight = 150;
     private const int ParticleCount = 100;
 
     private RenderWindow window;
-    private List<Particle> particles;
     private HashSet<Vector2i> occupiedPositions;
     private View view;
 
@@ -38,11 +29,9 @@ public class Simulation {
 
         window.SetView(view);
 
-        particles = new List<Particle>();
         occupiedPositions = new HashSet<Vector2i>();
 
         var origin = new Particle(LogicalWidth/2, LogicalHeight/2);
-        particles.Add(origin);
         occupiedPositions.Add(origin.Position);
     }
 
@@ -56,7 +45,6 @@ public class Simulation {
             }
         // once particle is adjacent to another particle, it remains there.
         occupiedPositions.Add(particle.Position);
-        particles.Add(new Particle(particle.Position.X, particle.Position.Y));
         }
 
     private bool IsAdjacent(Vector2i position) {
@@ -73,41 +61,23 @@ public class Simulation {
     }
 
     private int RandomWithEdgeCase(Vector2i position, bool x) {
-
-        Random random = new Random();
-
         if (x) {
-            if (position.X <= 0) {
-                return 1;
-                } else if (position.X >= LogicalWidth) {
-                    return -1;
-                }
-            }
-
-            else {
-                if (position.Y <= 0) {
-                return 1;
-                } else if (position.Y >= LogicalHeight) {
-                    return -1;
-                }
-            }
-
-        return random.Next(-1,2);
+            return position.X <= 0 ? 1 : (position.X >= LogicalWidth ? -1 : random.Next(-1, 2));
+        } else {
+            return position.Y <= 0 ? 1 : (position.Y >= LogicalHeight ? -1 : random.Next(-1, 2));
         }
+    }
 
 
     public void Run() {
-        int particleScale = 1;
-        Random random = new Random();
-        int i = 1;
         while (window.IsOpen) {
             window.DispatchEvents();
             window.Clear();
 
 
-            if (particles.Count < ParticleCount+1) {
+            if (occupiedPositions.Count <= ParticleCount) {
 
-                System.Console.WriteLine($"{i}/{ParticleCount}");
+                System.Console.WriteLine($"{occupiedPositions.Count}/{ParticleCount}");
 
                 // particle at edge of window
                 var x = random.Next(0, LogicalWidth);
@@ -118,18 +88,16 @@ public class Simulation {
             }
 
             // draw all the particles as 1x1 pixels
-            foreach (var particle in particles)
-            {
-                var shape = new RectangleShape(new Vector2f(particleScale, particleScale))
+            foreach (var position in occupiedPositions) {
+                var shape = new RectangleShape(new Vector2f(1, 1))
                 {
-                    Position = new Vector2f(particle.Position.X * particleScale, particle.Position.Y * particleScale),
-                    FillColor = Color.Red
+                    Position = new Vector2f(position.X, position.Y),
+                    FillColor = Color.Cyan
                 };
                 window.Draw(shape);
             }
 
             window.Display();
-            i++;
         }
     }
 
