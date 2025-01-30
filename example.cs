@@ -19,22 +19,29 @@ public class Particle {
 }
 
 public class Simulation {
-    private const int WindowWidth = 300;
-    private const int WindowHeight = 200;
-    private const int ParticleCount = 1000;
+    private const int WindowWidth = 800;
+    private const int WindowHeight = 800;
+    private const int LogicalWidth = 200;
+    private const int LogicalHeight = 200;
+    private const int ParticleCount = 100;
 
     private RenderWindow window;
     private List<Particle> particles;
     private HashSet<Vector2i> occupiedPositions;
+    private View view;
 
     public Simulation() {
         window = new RenderWindow(new VideoMode((uint)WindowWidth, (uint)WindowHeight), "DLA Simulation");
         window.Closed += (sender, e) => window.Close();
 
+        view = new View(new FloatRect(0, 0, LogicalWidth, LogicalHeight));
+
+        window.SetView(view);
+
         particles = new List<Particle>();
         occupiedPositions = new HashSet<Vector2i>();
 
-        var origin = new Particle(WindowWidth / 10, WindowHeight / 10);
+        var origin = new Particle(LogicalWidth/2, LogicalHeight/2);
         particles.Add(origin);
         occupiedPositions.Add(origin.Position);
     }
@@ -46,7 +53,6 @@ public class Simulation {
             int dy = RandomWithEdgeCase(particle.Position, false); // false +> y case
 
             particle.Position = new Vector2i(particle.Position.X + dx, particle.Position.Y + dy);
-            System.Console.WriteLine(particle.Position);
             }
         // once particle is adjacent to another particle, it remains there.
         occupiedPositions.Add(particle.Position);
@@ -73,7 +79,7 @@ public class Simulation {
         if (x) {
             if (position.X <= 0) {
                 return 1;
-                } else if (position.X >= WindowWidth) {
+                } else if (position.X >= LogicalWidth) {
                     return -1;
                 }
             }
@@ -81,7 +87,7 @@ public class Simulation {
             else {
                 if (position.Y <= 0) {
                 return 1;
-                } else if (position.Y >= WindowHeight) {
+                } else if (position.Y >= LogicalHeight) {
                     return -1;
                 }
             }
@@ -91,19 +97,21 @@ public class Simulation {
 
 
     public void Run() {
-        int particleScale = 5;
+        int particleScale = 1;
         Random random = new Random();
-
-        while (window.IsOpen)
-        {
+        int i = 1;
+        while (window.IsOpen) {
             window.DispatchEvents();
             window.Clear();
 
-            if (particles.Count < ParticleCount)
-            {
+
+            if (particles.Count < ParticleCount+1) {
+
+                System.Console.WriteLine($"{i}/{ParticleCount}");
+
                 // particle at edge of window
-                var x = random.Next(0, WindowWidth/5);
-                var y = random.Next(0, WindowHeight/5);
+                var x = random.Next(0, LogicalWidth);
+                var y = random.Next(0, LogicalHeight);
 
                 var newParticle = new Particle(x, y);
                 Diffuse(newParticle);
@@ -121,6 +129,7 @@ public class Simulation {
             }
 
             window.Display();
+            i++;
         }
     }
 
